@@ -9,8 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.1",
+    "antd": "^6.3.5",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "react": "19.2.4",
+    "react-body-highlighter": "^2.0.5",
     "react-dom": "19.2.4"
   },
   "devDependencies": {

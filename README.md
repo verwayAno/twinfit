@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TwinFit: AI-Powered Anatomical Sports Analytics
 
-## Getting Started
+![TwinFit Banner](https://via.placeholder.com/1200x400/0a0a0a/ffffff?text=TwinFit+AI+Sports+Dashboard)
 
-First, run the development server:
+## 🚀 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**TwinFit** is a high-fidelity, mobile-first ecosystem designed for professional athlete monitoring and sports analytics. It leverages an interactive **Anatomical Twin** visualization to provide real-time medical insights, injury risk assessment, and personalized health tracking.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The platform transforms complex physiological data into an intuitive, visual representation of the athlete's body, enabling medical staff and coaches to make data-driven decisions instantly.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ✨ Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🩺 Anatomical Digital Twin
+- **Interactive 3D Body Mapping**: Visualize muscle tension, joint strain, and active injury zones.
+- **Dynamic Heatmaps**: Real-time coloring based on physiological data (ECG, Heart Rate, Stress).
+- **Zone Selection**: Drill down into specific body regions (Shoulder, Knee, Ankle) for detailed biometrics.
 
-## Learn More
+### 📊 Medical & Insights Dashboard
+- **Instant Vitals Tracking**: Real-time monitoring of recovery scores, readiness, and physiological markers.
+- **AI-Driven Injury Models**: Predictive modeling of potential injury risks based on training load and historical data.
+- **Trend Analysis**: Integrated charts for tracking performance and recovery over long periods.
 
-To learn more about Next.js, take a look at the following resources:
+### 🤖 TwinBot Daily Check-In
+- **Conversational Interface**: A specialized mobile check-in assistant for athletes.
+- **Subjective Data Collection**: Easy-to-use input for RPE (Rate of Perceived Exertion), sleep quality, and localized pain Reporting.
+- **Auto-Sync**: Seamlessly updates the Anatomical Twin with subjective feedback.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 👤 Identity & Performance Hub
+- **Player Selection Radar**: Quickly switch between athletes in a team environment.
+- **Personalized Baselines**: Machine learning models that adapt to each athlete's unique physiological profile.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Technology Stack
 
-## Deploy on Vercel
+- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router)
+- **Styling**: Vanilla CSS with modern HSL palettes, Glassmorphism, and Fluid Typography.
+- **Visualization**: Custom SVG/Canvas Anatomical Mapping.
+- **Logic**: Javascript (ES6+) with custom injury modeling algorithms.
+- **Animations**: CSS Transitions & Micro-animations for a premium feel.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📦 Getting Started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Prerequisites
+
+- Node.js 18.x or higher
+- npm / yarn / pnpm
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/verwayAno/twinfit.git
+   cd twinfit
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📂 Project Structure
+
+- `src/components/`: Core UI components (AnatomicalTwin, MedicalDashboard, etc.)
+- `src/utils/`: Business logic and AI modeling (injuryModel.js)
+- `public/`: Static assets and athlete profile images.
+- `styles/`: Global CSS and design tokens.
+
+## 🤝 Contributing
+
+We welcome contributions to the TwinFit ecosystem! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+*TwinFit — The Future of Athlete Longevity.*
