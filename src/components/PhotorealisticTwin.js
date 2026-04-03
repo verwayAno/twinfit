@@ -174,7 +174,7 @@ function HumanoidView({ view, containerSize, risks, reportedZones, activeZoneId,
         </div>
       </div>
       <span className="text-[11px] font-black tracking-[0.4em] uppercase text-slate-400 flex items-center gap-3">
-         <Target size={16} className="text-cyan-500" /> {label}
+         <Activity size={16} className="text-cyan-500" /> {label}
       </span>
     </div>
   );

@@ -4,10 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import {
   AlertCircle, BrainCircuit, Activity, CheckCircle2,
   Quote, User, ShieldAlert, Thermometer, Clock,
-  CheckSquare, Info, FlaskConical, ClipboardCheck
+  CheckSquare, Info, FlaskConical, ClipboardCheck,
+  Heart, Zap, Gauge, Pill, Workflow
 } from "lucide-react";
-import { Card, Button, Tag, Skeleton, message, Row, Col, Space, Checkbox, Progress } from "antd";
-import { motion } from "framer-motion";
+import { Card, Button, Tag, Skeleton, message, Row, Col, Space, Checkbox, Progress, Tooltip } from "antd";
+import { motion, AnimatePresence } from "framer-motion";
 import players from "@/data/players.json";
 import { calculateInjuryRisk } from "@/utils/injuryModel";
 import PhotorealisticTwin from "@/components/PhotorealisticTwin";
@@ -19,7 +20,6 @@ export default function MedicalDashboard({ approvals, setApprovals, playerSubmis
   const flaggedPlayers = useMemo(() => {
     return players.map(p => {
       const risks = calculateInjuryRisk(p, { expected_play_time: defaultPlayTime, temperature: defaultTemp });
-      // Extract only the numerical muscle risks for the max calculation
       const muscleValues = Object.entries(risks)
         .filter(([key]) => !["bmi", "rtpForecast", "valueAtRisk", "rawMaxRisk"].includes(key))
         .map(([_, v]) => typeof v === 'object' ? v.total : v);
@@ -78,34 +78,50 @@ export default function MedicalDashboard({ approvals, setApprovals, playerSubmis
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-[1400px] mx-auto px-2 pb-20">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-black text-white flex items-center gap-3 tracking-tight">
-            <FlaskConical size={32} className="text-red-500" />
-            TRIAGE COMMAND CENTER
-          </h2>
-          <p className="text-slate-500 font-mono text-xs uppercase tracking-[0.2em] mt-1">High-Risk Personnel Monitoring & AI Prescription</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-[1400px] mx-auto px-4 pb-20">
+      {/* Enhanced Command Header */}
+      <div className="mb-12 flex items-end justify-between border-b border-white/5 pb-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-10">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/20 blur-[120px] rounded-full" />
         </div>
-        <div className="bg-slate-900/50 border border-slate-800 px-4 py-2 rounded-xl flex items-center gap-6">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 font-bold uppercase">Active Flags</span>
-            <span className="text-xl font-black text-red-500">{flaggedPlayers.length}</span>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded text-[10px] font-black text-red-500 tracking-[0.2em] uppercase mt-1">Status: Restricted</div>
+            <div className="h-px w-12 bg-white/10" />
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">System Time: {new Date().toLocaleTimeString()}</span>
           </div>
-          <div className="w-px h-8 bg-slate-800" />
-          <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 font-bold uppercase">AI Status</span>
-            <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> SYNTHESIZING</span>
+          <h2 className="text-5xl font-black text-white flex items-center gap-4 tracking-tight drop-shadow-2xl">
+            <FlaskConical size={48} className="text-red-500" />
+            TRIAGE COMMAND
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-8 relative z-10">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Critical Flags</span>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_#ef4444]" />
+              <span className="text-4xl font-black text-white">{flaggedPlayers.length}</span>
+            </div>
+          </div>
+          <div className="h-12 w-px bg-white/10" />
+          <div className="bg-emerald-500/5 border border-emerald-500/10 px-6 py-3 rounded-2xl flex flex-col">
+            <span className="text-[9px] text-emerald-500/60 font-black uppercase tracking-widest">AI Engine Status</span>
+            <span className="text-xs font-bold text-emerald-400 flex items-center gap-2 mt-1">
+              <Activity size={12} className="animate-pulse" />
+              OPTIMIZING FLOW
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
+      <div className="space-y-12">
         {flaggedPlayers.length === 0 && !loading && (
-          <div className="glass p-12 text-center text-slate-500 border-dashed border-2 border-slate-800">
-            <ClipboardCheck size={48} className="mx-auto mb-4 opacity-20" />
-            <p className="text-lg font-bold">Safe Environment Detected</p>
-            <p className="text-xs uppercase tracking-widest mt-1">No players currently exceed the 60% risk threshold.</p>
+          <div className="medical-glass p-20 text-center text-slate-500 border-dashed border border-white/10 rounded-[3rem]">
+            <ClipboardCheck size={64} className="mx-auto mb-6 opacity-20 text-emerald-500" />
+            <p className="text-2xl font-black text-white tracking-tight">Ecosystem Clear</p>
+            <p className="text-xs uppercase tracking-[0.3em] mt-2 text-slate-500">All personnel currently operating within safe biomechanical thresholds.</p>
           </div>
         )}
 
@@ -128,191 +144,160 @@ function TriageCard({ fp, isApproved, protoText, submission, handleApprove }) {
   const [activeZone, setActiveZone] = useState(null);
   const isProtoLoading = !protoText;
 
-  // NLP Parsing for Reported Pain
-  const reportedPainZone = submission?.targetedZones?.length > 0
-    ? submission.targetedZones[0]
-    : submission?.nlpLog?.match(/right knee|left knee|hamstring|lower back/i)?.[0];
-
   const handleZoneClick = (hs) => {
     setActiveZone(prev => prev === hs.id ? null : hs.id);
   };
 
   return (
     <Card
-      className="bg-slate-950 border-slate-800/80 hover:border-red-500/30 transition-all rounded-[2rem] overflow-hidden shadow-2xl relative"
+      className="bg-slate-950/40 medical-glass border-white/5 hover:border-red-500/20 transition-all duration-500 rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] relative"
       bodyStyle={{ padding: 0 }}
     >
-      {/* Header */}
-      <div className="bg-slate-900/40 px-8 py-5 flex items-center justify-between border-b border-slate-800/50 backdrop-blur-md">
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <img src={fp.player.imageUrl} className="w-16 h-16 rounded-2xl object-cover grayscale opacity-80 border border-slate-700" alt={fp.player.name} />
-            <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm border-2 shadow-lg
-                ${fp.maxRisk > 80 ? 'bg-red-500 text-white border-slate-900' : 'bg-amber-500 text-slate-900 border-slate-900'}`}>
-              {fp.maxRisk.toFixed(0)}
-            </div>
-          </div>
-          <div>
-            <h3 className="text-2xl font-black text-white m-0 tracking-tight">{fp.player.name}</h3>
-            <div className="flex gap-4 mt-1">
-              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-700" /> {fp.player.position}</span>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-700" /> {fp.player.age} Years Old</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          {isApproved && <Tag color="success" className="bg-emerald-500/10 border-emerald-500/30 text-emerald-400 px-4 py-1.5 rounded-xl font-bold uppercase text-[10px] tracking-widest">Protocol Active</Tag>}
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] font-bold text-slate-500 uppercase">Max Risk Threshold</span>
-            <span className="text-xs font-mono font-bold text-red-400">{fp.maxRisk.toFixed(1)}%</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 3-Column Triage */}
-      <Row className="min-h-[500px]">
-        {/* COL 1: ALGORITHMIC SCAN */}
-        <Col xs={24} md={8} className="border-r border-slate-800/50 p-8 flex flex-col items-center bg-[radial-gradient(circle_at_20%_20%,rgba(15,23,42,1)_0%,rgba(2,6,23,1)_100%)]">
-          <span className="w-full text-[10px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <Activity size={14} className="animate-pulse" /> 2.5D Digital Twin Scan
-          </span>
+      <Row className="min-h-[650px]">
+        {/* LEFT: THE DUAL SCANNER (40%) */}
+        <Col xs={24} md={10} className="relative border-r border-white/5 p-10 flex flex-col bg-slate-900/10">
           <PhotorealisticTwin
             risks={fp.risks}
             reportedZones={submission?.targetedZones || []}
             activeZoneId={activeZone}
             onZoneClick={handleZoneClick}
-            size="small"
+            isDualView={true}
           />
-          <div className="mt-8 w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] uppercase font-bold text-slate-500">Scan Confidence</span>
-              <span className="text-[10px] font-mono text-cyan-400">99.2%</span>
+
+          {/* Diagnostic Overlay */}
+          <div className="mt-auto pt-8">
+            <div className="flex justify-between items-end mb-3">
+              <div>
+                <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block mb-1">Scan Confidence</span>
+                <span className="text-2xl font-black text-white font-mono tracking-tighter">99.42%</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Biolatency</span>
+                <span className="text-xs font-mono text-emerald-400 font-bold">1.2ms</span>
+              </div>
             </div>
-            <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-cyan-500 w-[99.2%] shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
+            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: '99.42%' }}
+                className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+              />
             </div>
           </div>
         </Col>
 
-        {/* COL 2: PLAYER DATA & NLP */}
-        <Col xs={24} md={8} className="border-r border-slate-800/50 p-8 flex flex-col bg-slate-900/20">
-          <span className="w-full text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <User size={14} /> Athlete Biometrics
-          </span>
-
-          {submission ? (
-            <div className="flex flex-col gap-6 h-full">
-              {/* NLP Report Card */}
-              <div className="bg-slate-900 rounded-[2rem] p-6 border border-slate-800 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
-                <Quote size={32} className="text-slate-800 absolute -bottom-2 -right-2 rotate-180 opacity-50" />
-                <p className="text-md text-white font-medium italic leading-relaxed relative z-10">"{submission.nlpLog}"</p>
-
-                {reportedPainZone && (
-                  <Tag className="mt-4 bg-red-500/10 border-red-500/30 text-red-400 font-bold uppercase text-[9px] tracking-widest px-3 py-1 rounded-lg">
-                    Reported Pain: {reportedPainZone}
-                  </Tag>
-                )}
-              </div>
-
-              {/* Triage Badges */}
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <div className="bg-slate-900/50 p-3 rounded-2xl border border-slate-800 flex flex-col">
-                  <span className="text-[9px] text-slate-500 font-bold uppercase mb-1">Pain Scale</span>
-                  <span className="text-lg font-black text-white">0.6 <span className="text-xs text-slate-600">/ 1.0</span></span>
-                </div>
-                <div className="bg-slate-900/50 p-3 rounded-2xl border border-slate-800 flex flex-col">
-                  <span className="text-[9px] text-slate-500 font-bold uppercase mb-1">Sleep Deficit</span>
-                  <span className="text-lg font-black text-pink-500">{(8 - fp.player.average_sleep_this_week).toFixed(1)} <span className="text-xs text-slate-600">HRS</span></span>
+        {/* RIGHT: THE ANALYTICS HUB (60%) */}
+        <Col xs={24} md={14} className="p-10 flex flex-col">
+          {/* Header Bar */}
+          <div className="flex justify-between items-start mb-10">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <img src={fp.player.imageUrl} className="w-20 h-20 rounded-[2rem] object-cover grayscale brightness-125 border border-white/10 shadow-2xl" alt={fp.player.name} />
+                <div className="absolute -bottom-2 -right-2 bg-red-600 text-white text-[10px] font-black w-8 h-8 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950">
+                  {fp.maxRisk.toFixed(0)}
                 </div>
               </div>
-
-              <div className="mt-auto bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-2xl flex items-center gap-3">
-                <Info size={16} className="text-indigo-400 shrink-0" />
-                <p className="text-[11px] text-slate-400 leading-tight">Patient history indicates a {fp.player.injury_history !== 'none' ? 'recurrent' : 'new'} injury pattern. Applying historical coefficient.</p>
+              <div>
+                <h3 className="text-3xl font-black text-white tracking-tight leading-none mb-2">{fp.player.name}</h3>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <User size={12} className="text-cyan-500" /> {fp.player.position}
+                  </span>
+                  <div className="w-1 h-1 rounded-full bg-white/10" />
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Age: {fp.player.age}</span>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center opacity-30">
-              <LoaderIcon />
-              <p className="text-xs text-slate-400 mt-4 uppercase tracking-widest font-bold">Awaiting Data Sync</p>
-            </div>
-          )}
-        </Col>
-
-        {/* COL 3: AI PRESCRIPTION & RTP */}
-        <Col xs={24} md={8} className="p-8 flex flex-col bg-slate-950">
-          <span className="w-full text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <BrainCircuit size={14} /> Gemini AI Treatment
-          </span>
-
-          <div className="bg-slate-900/40 rounded-3xl p-6 border border-slate-800 mb-8 relative">
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
-              <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest">Optimized</span>
-            </div>
-            {isProtoLoading ? (
-              <div className="space-y-3">
-                <div className="h-3 w-3/4 bg-slate-800 rounded-full animate-pulse" />
-                <div className="h-3 w-1/2 bg-slate-800 rounded-full animate-pulse" />
-              </div>
-            ) : (
-              <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                {protoText.replace("Gemini AI Analysis: ", "⚠️ ")}
-              </p>
+            {isApproved && (
+              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+                <Tag color="success" className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 px-6 py-2 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-lg">
+                  Protocol Validated
+                </Tag>
+              </motion.div>
             )}
           </div>
 
-          <div className="flex flex-col gap-6">
-            {/* RTP Forecast Section */}
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-inner">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-amber-500" />
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">RTP Forecast</span>
-                </div>
-                <span className="text-xs font-mono font-bold text-amber-500">{fp.risks.rtpForecast} Days</span>
-              </div>
-              <Progress
-                percent={100 - (fp.risks.rtpForecast * 10)}
-                showInfo={false}
-                strokeColor="#fbbf24"
-                trailColor="#1e293b"
-                strokeWidth={8}
-                className="mb-2"
-              />
-              <p className="text-[10px] text-slate-500 text-center uppercase font-bold tracking-tight">Recovery estimated at {fp.risks.rtpForecast} days based on age ({fp.player.age}) and severity.</p>
-            </div>
-
-            {/* Clearance Checklist */}
-            <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Clearance Roadmap</span>
-              <div className="space-y-3">
-                {[
-                  "Schedule Urgent MRI Scan",
-                  "Log Restricted Training Status",
-                  "Initiate Local TENS Therapy"
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 group cursor-pointer">
-                    <div className="w-5 h-5 rounded-lg border-2 border-slate-700 flex items-center justify-center transition-colors group-hover:border-cyan-500">
-                      <CheckSquare size={12} className="text-cyan-500 opacity-0 group-hover:opacity-100" />
-                    </div>
-                    <span className="text-xs text-slate-400 group-hover:text-white transition-colors">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* Vitals Grid */}
+          <div className="grid grid-cols-4 gap-4 mb-10">
+            <VitalGauge label="Sleep" value={fp.player.average_sleep_this_week} max={8} unit="HRS" color="#ec4899" />
+            <VitalGauge label="Intensity" value={fp.maxRisk} max={100} unit="%" color="#ef4444" />
+            <VitalGauge label="HRV" value={82} max={100} unit="ms" color="#8b5cf6" />
+            <VitalGauge label="Recovery" value={100 - (fp.risks.rtpForecast * 10)} max={100} unit="%" color="#10b981" />
           </div>
 
-          <div className="mt-8">
-            <Button
-              type="primary"
-              className={`w-full h-14 rounded-2xl font-black uppercase tracking-[0.1em] text-xs transition-all border-0 shadow-lg flex items-center justify-center gap-2
-                   ${isApproved ? 'bg-emerald-600 pointer-events-none' : 'bg-red-600 hover:bg-red-500 animate-pulse-slow'}`}
-              onClick={() => handleApprove(fp.player.id, protoText)}
-              disabled={isApproved || isProtoLoading}
-            >
-              {isApproved ? <><CheckCircle2 size={16} /> Protocol Sent to Coach</> : <><ShieldAlert size={16} /> Restrict Player Playoff Status</>}
-            </Button>
+          {/* AI Transcription Module */}
+          <div className="flex-1 flex flex-col gap-6">
+            <div className="bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-emerald-500/10 rounded-xl">
+                  <BrainCircuit size={20} className="text-emerald-400" />
+                </div>
+                <span className="text-[11px] font-black text-white/80 uppercase tracking-[0.2em]">Gemini AI Clinical Prescription</span>
+                {isProtoLoading && <div className="ml-auto w-2 h-2 bg-emerald-500 rounded-full animate-ping" />}
+              </div>
+
+              {isProtoLoading ? (
+                <div className="space-y-4">
+                  <Skeleton active paragraph={{ rows: 3 }} title={false} />
+                </div>
+              ) : (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={protoText}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-md text-slate-300 leading-relaxed font-medium bg-slate-900/40 p-5 rounded-2xl border border-white/5"
+                  >
+                    {protoText.replace("Gemini AI Analysis: ", "RECOMMENDATION: ")}
+                  </motion.div>
+                </AnimatePresence>
+              )}
+
+              {/* Athlete's Input Quote */}
+              {submission && (
+                <div className="mt-8 flex items-start gap-4 bg-white/5 p-4 rounded-2xl italic">
+                  <Quote size={20} className="text-slate-600 mt-1 shrink-0" />
+                  <p className="text-sm text-slate-400 line-clamp-2">"{submission.nlpLog}"</p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Bar */}
+            <div className="bg-slate-900/40 rounded-[2.5rem] p-8 border border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-8">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Est. Recovery</span>
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-amber-500" />
+                    <span className="text-xl font-black text-white">{fp.risks.rtpForecast} <span className="text-xs text-slate-500">Days</span></span>
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Clearance Steps</span>
+                  <div className="flex gap-2">
+                    <div className="w-5 h-5 rounded-md bg-emerald-500/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-emerald-500" /></div>
+                    <div className="w-5 h-5 rounded-md border border-white/10" />
+                    <div className="w-5 h-5 rounded-md border border-white/10" />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="primary"
+                className={`h-16 px-10 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[10px] transition-all border-0 shadow-2xl flex items-center justify-center gap-3
+                       ${isApproved ? 'bg-emerald-600' : 'bg-red-600 hover:bg-red-500 hover:scale-105 active:scale-95'}`}
+                onClick={() => handleApprove(fp.player.id, protoText)}
+                disabled={isApproved || isProtoLoading}
+              >
+                {isApproved ? (
+                  <><CheckCircle2 size={18} /> Protocol Dispatched</>
+                ) : (
+                  <><ShieldAlert size={18} /> Formalize Medical Restriction</>
+                )}
+              </Button>
+            </div>
           </div>
         </Col>
       </Row>
@@ -320,11 +305,47 @@ function TriageCard({ fp, isApproved, protoText, submission, handleApprove }) {
   );
 }
 
+function VitalGauge({ label, value, max, unit, color }) {
+  const percent = Math.min(100, (value / max) * 100);
+
+  return (
+    <div className="bg-white/5 border border-white/5 rounded-3xl p-4 flex flex-col items-center">
+      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">{label}</span>
+      <div className="relative w-16 h-16 mb-2">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="32" cy="32" r="28"
+            fill="transparent"
+            stroke="currentColor"
+            strokeWidth="4"
+            className="text-white/5"
+          />
+          <motion.circle
+            cx="32" cy="32" r="28"
+            fill="transparent"
+            stroke={color}
+            strokeWidth="4"
+            strokeDasharray={176}
+            initial={{ strokeDashoffset: 176 }}
+            animate={{ strokeDashoffset: 176 - (176 * percent / 100) }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-sm font-black text-white">{value.toFixed(percent === 100 ? 0 : 1)}</span>
+        </div>
+      </div>
+      <span className="text-[9px] font-mono font-bold text-slate-500">{unit}</span>
+    </div>
+  );
+}
+
 function LoaderIcon() {
   return (
-    <div className="relative w-12 h-12">
-      <div className="absolute inset-0 border-4 border-indigo-500/20 rounded-full" />
-      <div className="absolute inset-0 border-4 border-t-indigo-500 rounded-full animate-spin" />
+    <div className="relative w-16 h-16">
+      <div className="absolute inset-0 border-4 border-indigo-500/10 rounded-full" />
+      <div className="absolute inset-0 border-4 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_15px_#6366f1]" />
     </div>
   );
 }
