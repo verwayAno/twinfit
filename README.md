@@ -1,84 +1,116 @@
-# TwinFit: AI-Powered Anatomical Sports Analytics
+# TwinFit
 
-![TwinFit Banner](https://via.placeholder.com/1200x400/0a0a0a/ffffff?text=TwinFit+AI+Sports+Dashboard)
+TwinFit is a multi-role athlete monitoring prototype built with Next.js. It connects three interfaces in one app:
 
-## 🚀 Overview
+- Player check-in for subjective symptoms and pain-zone reporting
+- Medical triage for AI-assisted review and protocol validation
+- Coach intelligence view for live risk tracking and approved return-to-play guidance
 
-**TwinFit** is a high-fidelity, mobile-first ecosystem designed for professional athlete monitoring and sports analytics. It leverages an interactive **Anatomical Twin** visualization to provide real-time medical insights, injury risk assessment, and personalized health tracking.
+The app now opens on the Player interface by default so the athlete workflow is the first experience when launching the product.
 
-The platform transforms complex physiological data into an intuitive, visual representation of the athlete's body, enabling medical staff and coaches to make data-driven decisions instantly.
+## Overview
 
-## ✨ Key Features
+TwinFit combines subjective player input, injury-risk modeling, and role-specific decision support into one shared interface. Players report how they feel, medical staff validate what matters, and coaches act on reviewed information rather than raw unconfirmed signals.
 
-### 🩺 Anatomical Digital Twin
-- **Interactive 3D Body Mapping**: Visualize muscle tension, joint strain, and active injury zones.
-- **Dynamic Heatmaps**: Real-time coloring based on physiological data (ECG, Heart Rate, Stress).
-- **Zone Selection**: Drill down into specific body regions (Shoulder, Knee, Ankle) for detailed biometrics.
+## Current Product Flow
 
-### 📊 Medical & Insights Dashboard
-- **Instant Vitals Tracking**: Real-time monitoring of recovery scores, readiness, and physiological markers.
-- **AI-Driven Injury Models**: Predictive modeling of potential injury risks based on training load and historical data.
-- **Trend Analysis**: Integrated charts for tracking performance and recovery over long periods.
+1. A player opens the app and completes a check-in.
+2. The submission stores notes, selected body zones, and review state.
+3. Medical staff review flagged players inside the triage dashboard.
+4. When medical validates a protocol, that approval is pushed into shared app state.
+5. The coach dashboard immediately reflects the approved recommendation and shows a live update.
 
-### 🤖 TwinBot Daily Check-In
-- **Conversational Interface**: A specialized mobile check-in assistant for athletes.
-- **Subjective Data Collection**: Easy-to-use input for RPE (Rate of Perceived Exertion), sleep quality, and localized pain Reporting.
-- **Auto-Sync**: Seamlessly updates the Anatomical Twin with subjective feedback.
+## Key Features
 
-### 👤 Identity & Performance Hub
-- **Player Selection Radar**: Quickly switch between athletes in a team environment.
-- **Personalized Baselines**: Machine learning models that adapt to each athlete's unique physiological profile.
+### Player Interface
 
-## 🛠️ Technology Stack
+- Player-first launch experience
+- Mobile-style check-in flow
+- Body-zone pain reporting
+- Submission status feedback for pending review and approved protocols
 
-- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router)
-- **Styling**: Vanilla CSS with modern HSL palettes, Glassmorphism, and Fluid Typography.
-- **Visualization**: Custom SVG/Canvas Anatomical Mapping.
-- **Logic**: Javascript (ES6+) with custom injury modeling algorithms.
-- **Animations**: CSS Transitions & Micro-animations for a premium feel.
+### Medical Dashboard
 
-## 📦 Getting Started
+- Redesigned triage cards with a simple anatomical injury preview on the left
+- AI risk overlays on the anatomical body map
+- Dashed anatomical overlays for player-reported pain zones
+- AI-generated protocol review and medical approval action
+- Pending review queue for self-reported submissions outside the critical-risk list
+
+### Coach Dashboard
+
+- Roster indicators for pending and approved players
+- Approved medical recommendations displayed directly in the insights panel
+- Player-reported injury zones reflected on the body visualization
+- Live approval alerts in the coach feed
+
+### Team Report
+
+- Dedicated report route at `/report`
+- Animated loading state while team protocols are assembled
+- White-background printable layout for daily follow-up
+- Full-team risk grouping for critical, elevated, and clear players
+- Save-to-PDF workflow through browser print
+
+## Tech Stack
+
+- Next.js 16.2.2
+- React 19.2.4
+- Ant Design 6
+- Framer Motion 12
+- Lucide React
+- Tailwind CSS 4
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.x or higher
-- npm / yarn / pnpm
+- Node.js 18 or later
+- npm
 
-### Installation
+### Install
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/verwayAno/twinfit.git
-   cd twinfit
-   ```
+```bash
+npm install
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Run
 
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open the local URL shown by Next.js in the terminal.
 
-## 📂 Project Structure
+## Main Routes
 
-- `src/components/`: Core UI components (AnatomicalTwin, MedicalDashboard, etc.)
-- `src/utils/`: Business logic and AI modeling (injuryModel.js)
-- `public/`: Static assets and athlete profile images.
-- `styles/`: Global CSS and design tokens.
+- `/` for the multi-role app shell
+- `/report` for the printable full-team report
+- `/api/generate-protocol` for the mock AI protocol endpoint
 
-## 🤝 Contributing
+## Project Structure
 
-We welcome contributions to the TwinFit ecosystem! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+```text
+src/
+  app/
+    page.js
+    report/page.js
+    api/generate-protocol/route.js
+  components/
+    AnatomicalTwin.js
+    CoachDashboard.js
+    IdentityPanel.js
+    InsightsPanel.js
+    MedicalDashboard.js
+    PlayerApp.js
+  data/
+    players.json
+  utils/
+    injuryModel.js
+```
 
-## 📄 License
+## Notes
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-*TwinFit — The Future of Athlete Longevity.*
+- Shared cross-role state is currently modeled with in-memory React state for prototype purposes.
+- Medical approvals and player submissions are not persisted to a backend yet.
+- The protocol endpoint is mock AI logic intended for demonstration and workflow testing.
