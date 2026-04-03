@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, ShieldAlert, ShieldCheck, DollarSign, BrainCircuit, Loader2 } from "lucide-react";
+import { FileText, ShieldAlert, ShieldCheck, DollarSign, BrainCircuit, Loader2, CheckCircle2, Clock } from "lucide-react";
 
 const COSTS = [8500, 12000, 15000, 22000, 28000, 35000, 42000, 55000];
 
@@ -12,41 +12,7 @@ function getCost(risks) {
   return COSTS[idx] * crits.length;
 }
 
-function handleExport(player, risks, playTime, temperature, aiProtocol) {
-  const lines = [
-    `TWINFIT ASSISTANT PROTOCOL`,
-    `Generated: ${new Date().toLocaleString()}`,
-    `─────────────────────────────────────`,
-    `Player:       ${player?.name ?? "N/A"}`,
-    `Position:     ${player?.position ?? "N/A"}`,
-    `Age:          ${player?.age ?? "N/A"}`,
-    `─────────────────────────────────────`,
-    `MATCH CONDITIONS`,
-    `Play Time:    ${playTime} min`,
-    `Temperature:  ${temperature}°C`,
-    `─────────────────────────────────────`,
-    `BIOMETRIC PROFILE`,
-    `BMI:          ${risks.bmi || "N/A"}`,
-    `Weight:       ${player?.weight_kg || "N/A"} kg`,
-    `Height:       ${player?.height_cm || "N/A"} cm`,
-    `─────────────────────────────────────`,
-    `INJURY RISK ASSESSMENT`,
-    `Hamstrings:   ${risks.hamstrings?.toFixed(1) ?? 0}%`,
-    `Knees:        ${risks.knees?.toFixed(1) ?? 0}%`,
-    `Lower Back:   ${risks.lowerBack?.toFixed(1) ?? 0}%`,
-    `─────────────────────────────────────`,
-    `GEMINI AI PRESCRIPTION`,
-    aiProtocol || "No protocol generated."
-  ];
-
-  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-  const url  = URL.createObjectURL(blob);
-  const a    = Object.assign(document.createElement("a"), { href: url, download: `twinfit_${player?.name?.replace(/\s/g,"_") ?? "player"}.txt` });
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-export default function ActionPanel({ risks, player, playTime, temperature }) {
+export default function ActionPanel({ risks, player, playTime, temperature, approvedProtocol, playerSubmission }) {
   const [aiProtocol, setAiProtocol] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -56,6 +22,14 @@ export default function ActionPanel({ risks, player, playTime, temperature }) {
 
   useEffect(() => {
     let active = true;
+
+    // Medical team has already validated a protocol — use it directly, skip the AI round-trip.
+    if (approvedProtocol) {
+      setAiProtocol(approvedProtocol);
+      setLoading(false);
+      return;
+    }
+
     async function fetchProtocol() {
       setLoading(true);
       try {
@@ -78,7 +52,7 @@ export default function ActionPanel({ risks, player, playTime, temperature }) {
     }
     
     return () => { active = false; };
-  }, [player, hamstrings, knees, lowerBack, playTime, temperature]);
+  }, [player, approvedProtocol, hamstrings, knees, lowerBack, playTime, temperature]);
 
   return (
     <div className="glass p-4 flex flex-col gap-3">
@@ -94,7 +68,20 @@ export default function ActionPanel({ risks, player, playTime, temperature }) {
         </div>
       </div>
 
-      {/* AI AI Generation Panel */}
+      {/* Protocol source badge */}
+      {approvedProtocol ? (
+        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/20 -mt-1 mb-1">
+          <CheckCircle2 size={11} className="text-emerald-400 shrink-0" />
+          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-400">Medical Staff Validated</span>
+        </div>
+      ) : playerSubmission && !loading ? (
+        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-amber-500/8 border border-amber-500/20 -mt-1 mb-1">
+          <Clock size={11} className="text-amber-400 shrink-0" />
+          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-400">Awaiting Medical Review</span>
+        </div>
+      ) : null}
+
+      {/* AI / Approved Protocol panel */}
       <div className="space-y-2 overflow-y-auto" style={{ minHeight: "160px", maxHeight: "160px" }}>
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 opacity-70">
@@ -104,20 +91,31 @@ export default function ActionPanel({ risks, player, playTime, temperature }) {
         ) : (
           <div className="rounded-xl p-3"
             style={{
-              background: maxRisk > 75 ? "rgba(239,68,68,0.08)" : maxRisk >= 40 ? "rgba(245,158,11,0.08)" : "rgba(52,211,153,0.06)",
-              border: `1px solid ${maxRisk > 75 ? "rgba(239,68,68,0.2)" : maxRisk >= 40 ? "rgba(245,158,11,0.2)" : "rgba(52,211,153,0.2)"}`,
+              background: approvedProtocol
+                ? "rgba(16,185,129,0.07)"
+                : maxRisk > 75 ? "rgba(239,68,68,0.08)" : maxRisk >= 40 ? "rgba(245,158,11,0.08)" : "rgba(52,211,153,0.06)",
+              border: `1px solid ${approvedProtocol ? "rgba(16,185,129,0.25)" : maxRisk > 75 ? "rgba(239,68,68,0.2)" : maxRisk >= 40 ? "rgba(245,158,11,0.2)" : "rgba(52,211,153,0.2)"}`,
             }}>
             <div className="flex items-center gap-2 mb-2">
-              {maxRisk > 75
-                ? <ShieldAlert size={12} style={{ color: "#f87171" }} />
-                : <ShieldCheck size={12} style={{ color: maxRisk >= 40 ? "#fbbf24" : "#34d399" }} />}
-              <span className="hud-label font-bold uppercase" style={{ color: maxRisk > 75 ? "#f87171" : maxRisk >= 40 ? "#fbbf24" : "#34d399" }}>
-                {maxRisk > 75 ? "CRITICAL RISK DETECTED" : maxRisk >= 40 ? "ELEVATED RISK DETECTED" : "ALL CLEAR"}
+              {approvedProtocol
+                ? <CheckCircle2 size={12} style={{ color: "#34d399" }} />
+                : maxRisk > 75
+                  ? <ShieldAlert size={12} style={{ color: "#f87171" }} />
+                  : <ShieldCheck size={12} style={{ color: maxRisk >= 40 ? "#fbbf24" : "#34d399" }} />}
+              <span className="hud-label font-bold uppercase" style={{ color: approvedProtocol ? "#34d399" : maxRisk > 75 ? "#f87171" : maxRisk >= 40 ? "#fbbf24" : "#34d399" }}>
+                {approvedProtocol ? "MEDICAL RECOMMENDATION" : maxRisk > 75 ? "CRITICAL RISK DETECTED" : maxRisk >= 40 ? "ELEVATED RISK DETECTED" : "ALL CLEAR"}
               </span>
             </div>
             <p className="text-sm leading-relaxed tracking-wide" style={{ color: "#cbd5e1" }}>
               {aiProtocol}
             </p>
+            {/* Show player's own note when it exists */}
+            {playerSubmission?.nlpLog && (
+              <div className="mt-2 pt-2 border-t border-white/5 flex items-start gap-2">
+                <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 shrink-0 mt-0.5">Player:</span>
+                <p className="text-[10px] text-slate-400 italic line-clamp-2">{playerSubmission.nlpLog}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -145,12 +143,10 @@ export default function ActionPanel({ risks, player, playTime, temperature }) {
       {/* Export button */}
       <button
         className="export-btn"
-        disabled={loading}
-        style={{ opacity: loading ? 0.5 : 1 }}
-        onClick={() => handleExport(player, risks, playTime, temperature, aiProtocol)}
+        onClick={() => window.open("/report", "_blank")}
       >
-        <Download size={14} />
-        Export Recovery Protocol
+        <FileText size={14} />
+        View Full Team Report
       </button>
     </div>
   );

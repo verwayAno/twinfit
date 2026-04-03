@@ -35,7 +35,7 @@ const DYNAMIC_COLORS = {
   red: "bg-red-500 shadow-[0_0_20px_#ef4444]"
 };
 
-export default function PlayerApp({ setPlayerSubmissions, setLiveAlerts }) {
+export default function PlayerApp({ setPlayerSubmissions, setLiveAlerts, approvals = {}, playerSubmissions = {} }) {
   const [currentScreen, setCurrentScreen] = useState("list"); // "list" | "checkin"
   const [activePlayer, setActivePlayer] = useState(null);
 
@@ -153,26 +153,50 @@ export default function PlayerApp({ setPlayerSubmissions, setLiveAlerts }) {
                  </div>
                  
                  <div className="flex flex-col gap-3">
-                   {players.map(p => (
+                   {players.map(p => {
+                     const hasApproval = !!approvals[p.id];
+                     const hasSub      = !!playerSubmissions[p.id];
+                     return (
                      <div 
                        key={p.id} 
                        onClick={() => openCheckIn(p)}
                        className="flex items-center gap-3 p-3 bg-slate-900/40 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer group shadow-sm"
                      >
                        <img src={p.imageUrl} alt={p.name} className="w-12 h-12 rounded-full object-cover bg-slate-950 border border-slate-700" onError={(e) => e.currentTarget.src = "/anatomy-front.png"} />
-                       <div className="flex-1">
+                       <div className="flex-1 min-w-0">
                          <h3 className="text-sm font-bold text-slate-200 group-hover:text-cyan-400 transition-colors">{p.name}</h3>
                          <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-600 group-hover:bg-cyan-500 transition-colors"></div>{p.position}</span>
                        </div>
-                       <ChevronRight size={18} className="text-slate-600 group-hover:text-cyan-400 transition-colors transform group-hover:translate-x-1" />
+                       {/* Status badge */}
+                       {hasApproval ? (
+                         <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shrink-0">✓ Cleared</span>
+                       ) : hasSub ? (
+                         <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0 animate-pulse">Pending</span>
+                       ) : (
+                         <ChevronRight size={18} className="text-slate-600 group-hover:text-cyan-400 transition-colors transform group-hover:translate-x-1" />
+                       )}
                      </div>
-                   ))}
+                   )})}
                  </div>
               </motion.div>
             )}
 
             {currentScreen === "checkin" && activePlayer && (
               <motion.div key="checkin" variants={fadeLayout} initial="hidden" animate="visible" exit="exit" className="absolute inset-0 flex flex-col overflow-hidden bg-slate-950">
+                
+                {/* Medical approval / pending notice */}
+                {(approvals[activePlayer.id] || playerSubmissions[activePlayer.id]) && (
+                  <div className={`mx-4 mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider ${
+                    approvals[activePlayer.id]
+                      ? "bg-emerald-500/10 border border-emerald-500/25 text-emerald-400"
+                      : "bg-amber-500/10 border border-amber-500/25 text-amber-400"
+                  }`}>
+                    {approvals[activePlayer.id]
+                      ? <>✓ Medical protocol validated — stay safe!</>
+                      : <>Check-in received. Awaiting medical review…</>
+                    }
+                  </div>
+                )}
                 
                 {/* Scrollable Main Content */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-5 flex flex-col gap-6 pb-[90px]">

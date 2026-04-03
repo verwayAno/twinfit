@@ -69,7 +69,7 @@ function PlayerAvatar({ player, size = "small" }) {
 // -------------------------------------------------------------
 // Main Component
 // -------------------------------------------------------------
-export default function IdentityPanel({ players, selected, onSelect }) {
+export default function IdentityPanel({ players, selected, onSelect, approvals = {}, playerSubmissions = {} }) {
   const [q, setQ] = useState("");
   
   const filtered  = players.filter(p =>
@@ -147,6 +147,13 @@ export default function IdentityPanel({ players, selected, onSelect }) {
         {filtered.map(p => {
           const pc  = POS[p.position];
           const sel = selected?.id === p.id;
+          const hasApproval    = !!approvals[p.id];
+          const hasSub         = !!playerSubmissions[p.id];
+          const statusDot = hasApproval
+            ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]"
+            : hasSub
+              ? "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)] animate-pulse"
+              : null;
           
           return (
             <button key={p.id} id={`player-${p.id}`}
@@ -163,12 +170,22 @@ export default function IdentityPanel({ players, selected, onSelect }) {
                   </p>
                   <span className="text-slate-600 text-[10px]">·</span>
                   <p className="text-[10px] text-slate-400 truncate max-w-[80px] sm:max-w-[120px]">{p.team}</p>
-                  <span className="text-slate-600 text-[10px]">·</span>
-                  <p className="text-[10px] text-slate-500 font-mono">{fmtVal(p.market_value_eur)}</p>
                 </div>
               </div>
 
-              {sel && <ChevronRight size={14} className="text-cyan-400 shrink-0" />}
+              {/* Status indicator */}
+              {statusDot ? (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDot}`} />
+                  <span className={`text-[8px] font-black uppercase tracking-widest ${
+                    hasApproval ? "text-emerald-500" : "text-amber-400"
+                  }`}>
+                    {hasApproval ? "OK" : "⚑"}
+                  </span>
+                </div>
+              ) : sel ? (
+                <ChevronRight size={14} className="text-cyan-400 shrink-0" />
+              ) : null}
             </button>
           );
         })}

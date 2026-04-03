@@ -10,7 +10,7 @@ import PlayerApp        from "@/components/PlayerApp";
 
 export default function TwinFitShell() {
   // Global Role State
-  const [role, setRole] = useState("COACH"); // 'COACH', 'MEDICAL', 'PLAYER'
+  const [role, setRole] = useState("PLAYER"); // 'COACH', 'MEDICAL', 'PLAYER'
   
   // Global Approvals State (simulating a database for the hackathon)
   // { "player_id": "Approved AI Protocol String" }
@@ -93,7 +93,7 @@ export default function TwinFitShell() {
 
       {/* ══════════ MAIN CONTENT AREA ══════════ */}
       <main className="relative z-10 flex-1 max-w-screen-2xl mx-auto w-full px-4 lg:px-6 py-6 pb-12">
-        {role === "COACH"   && <CoachDashboard liveAlerts={liveAlerts} />}
+        {role === "COACH"   && <CoachDashboard liveAlerts={liveAlerts} approvals={approvals} playerSubmissions={playerSubmissions} />}
         {role === "MEDICAL" && <MedicalDashboard approvals={approvals} setApprovals={setApprovals} playerSubmissions={playerSubmissions} setLiveAlerts={setLiveAlerts} />}
         {role === "PLAYER"  && <PlayerApp approvals={approvals} playerSubmissions={playerSubmissions} setPlayerSubmissions={setPlayerSubmissions} setLiveAlerts={setLiveAlerts} />}
       </main>

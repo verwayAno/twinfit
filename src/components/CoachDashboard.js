@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from "react";
-import { AlertTriangle, RotateCw } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { Slider } from "antd";
 import players        from "@/data/players.json";
 import { calculateInjuryRisk } from "@/utils/injuryModel";
@@ -13,7 +13,7 @@ import ActionPanel    from "@/components/InsightsPanel";
 // Helper functions needed in the component
 function rCol(v) { return v > 75 ? "#f87171" : v >= 40 ? "#fb923c" : "#22d3ee"; }
 
-export default function CoachDashboard({ liveAlerts = [] }) {
+export default function CoachDashboard({ liveAlerts = [], approvals = {}, playerSubmissions = {} }) {
   /* ── State ── */
   const [selected,    setSelected]    = useState(players[4]);
   const [playTime,    setPlayTime]    = useState(45);
@@ -39,6 +39,10 @@ export default function CoachDashboard({ liveAlerts = [] }) {
     setActiveZone(prev => prev === hs.id ? null : hs.id);
   };
 
+  /* ── Per-player submission / approval state ── */
+  const currentSubmission = playerSubmissions[selected?.id];
+  const currentApproval   = approvals[selected?.id];
+
   /* ── Risk calculation ── */
   const risks = useMemo(() => {
     if (!selected) return { hamstrings: 0, knees: 0, lowerBack: 0 };
@@ -50,7 +54,13 @@ export default function CoachDashboard({ liveAlerts = [] }) {
       {/* ── LEFT ── */}
       <div className="flex flex-col gap-4">
         <div className="anim-left d100">
-          <IdentityPanel players={players} selected={selected} onSelect={handleSelectPlayer} />
+          <IdentityPanel
+            players={players}
+            selected={selected}
+            onSelect={handleSelectPlayer}
+            approvals={approvals}
+            playerSubmissions={playerSubmissions}
+          />
         </div>
         <div className="anim-left d200">
           <SimulatorPanel
@@ -71,6 +81,18 @@ export default function CoachDashboard({ liveAlerts = [] }) {
             <p className="hud-label hud-label-c mt-0.5">
               {selected ? `Thermal scan: ${selected.name}` : "Select a player"}
             </p>
+            {/* Medical-approval / pending-submission banner */}
+            {(currentApproval || currentSubmission) && (
+              <div className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest ${
+                currentApproval
+                  ? "bg-emerald-500/8 border-emerald-500/20 text-emerald-400"
+                  : "bg-amber-500/8 border-amber-500/20 text-amber-400"
+              }`}>
+                {currentApproval
+                  ? <><CheckCircle2 size={11} className="shrink-0" />Medical Protocol Validated</>
+                  : <><Clock        size={11} className="shrink-0" />Check-in Received — Pending Medical Review</>}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {[["H", risks.hamstrings?.total || 0],["K", risks.knees?.total || 0],["B", risks.lowerBack?.total || 0]].map(([k, v]) => {
@@ -104,9 +126,9 @@ export default function CoachDashboard({ liveAlerts = [] }) {
           {/* Atmospheric Glow */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.05)_0%,transparent_70%)] pointer-events-none" />
 
-          <PhotorealisticTwin 
-            risks={risks} 
-            reportedZones={[]} 
+          <PhotorealisticTwin
+            risks={risks}
+            reportedZones={currentSubmission?.targetedZones || []}
             activeZoneId={activeZone}
             onZoneClick={toggleZone}
             isSplit={true}
@@ -155,8 +177,14 @@ export default function CoachDashboard({ liveAlerts = [] }) {
                 </div>
              ) : (
                 liveAlerts.map(al => (
-                  <div key={al.id} className="bg-amber-500/10 border-l-2 border-amber-500 p-2 rounded text-left">
-                     <p className="text-[10px] uppercase font-bold text-amber-500 tracking-wider flex justify-between">
+                  <div key={al.id} className={`border-l-2 p-2 rounded text-left ${
+                    al.type === "success"
+                      ? "bg-emerald-500/10 border-emerald-500"
+                      : "bg-amber-500/10 border-amber-500"
+                  }`}>
+                     <p className={`text-[10px] uppercase font-bold tracking-wider flex justify-between ${
+                       al.type === "success" ? "text-emerald-400" : "text-amber-500"
+                     }`}>
                        {al.title}
                        <span className="text-slate-500 font-mono font-normal">Just now</span>
                      </p>
@@ -182,6 +210,8 @@ export default function CoachDashboard({ liveAlerts = [] }) {
             player={selected}
             playTime={playTime}
             temperature={temperature}
+            approvedProtocol={currentApproval}
+            playerSubmission={currentSubmission}
           />
         </div>
       </div>
