@@ -3,10 +3,10 @@ import { AlertTriangle, RotateCw } from "lucide-react";
 import { Slider } from "antd";
 import players        from "@/data/players.json";
 import { calculateInjuryRisk } from "@/utils/injuryModel";
-import ThermalBody    from "@/components/ThermalBody";
-import MatchTimeline  from "@/components/MatchTimeline";
 import IdentityPanel  from "@/components/IdentityPanel";
 import RiskPanel      from "@/components/RiskPanel";
+import MatchTimeline  from "@/components/MatchTimeline";
+import PhotorealisticTwin from "@/components/PhotorealisticTwin";
 import SimulatorPanel from "@/components/SimulatorControls";
 import ActionPanel    from "@/components/InsightsPanel";
 
@@ -18,23 +18,26 @@ export default function CoachDashboard({ liveAlerts = [] }) {
   const [selected,    setSelected]    = useState(players[4]);
   const [playTime,    setPlayTime]    = useState(45);
   const [temperature, setTemperature] = useState(15);
-  const [rotationY,   setRotationY]   = useState(0);
+  const [activeZone,  setActiveZone]  = useState(null);
 
   /* ── Smooth player transition ── */
-  const [bodyKey,   setBodyKey]   = useState(0); 
   const [fading,    setFading]    = useState(false);
   const fadeTimer = useRef(null);
 
   const handleSelectPlayer = useCallback((p) => {
     if (p.id === selected?.id) return;
     setFading(true);
+    setActiveZone(null); // Reset selection
     clearTimeout(fadeTimer.current);
     fadeTimer.current = setTimeout(() => {
       setSelected(p);
-      setBodyKey(k => k + 1);
       setFading(false);
     }, 240);
   }, [selected]);
+
+  const toggleZone = (hs) => {
+    setActiveZone(prev => prev === hs.id ? null : hs.id);
+  };
 
   /* ── Risk calculation ── */
   const risks = useMemo(() => {
@@ -69,66 +72,45 @@ export default function CoachDashboard({ liveAlerts = [] }) {
               {selected ? `Thermal scan: ${selected.name}` : "Select a player"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {[["H", risks.hamstrings],["K", risks.knees],["B", risks.lowerBack]].map(([k, v]) => {
+          <div className="flex items-center gap-3">
+            {[["H", risks.hamstrings?.total || 0],["K", risks.knees?.total || 0],["B", risks.lowerBack?.total || 0]].map(([k, v]) => {
               const c = rCol(v);
               return (
-                <div key={k} className="flex flex-col items-center px-2.5 py-1.5 rounded-lg"
-                  style={{ background:`${c}12`, border:`1px solid ${c}28` }}>
-                  <span className="hud-label" style={{ color:c, opacity:0.75 }}>{k}</span>
-                  <span className="mono font-bold text-sm" style={{ color:c }}>{v.toFixed(0)}%</span>
+                <div key={k} className="flex flex-col items-center px-3 py-2 rounded-xl backdrop-blur-md"
+                  style={{ background:`${c}15`, border:`1px solid ${c}35`, boxShadow: `0 0 15px ${c}15` }}>
+                  <span className="text-[10px] font-black tracking-widest" style={{ color:c, opacity:0.8 }}>{k}</span>
+                  <span className="font-mono font-black text-base" style={{ color:c }}>{v.toFixed(0)}%</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* ── Thermal Body ── */}
+        {/* ── Hologram Stage ── */}
         <div
-          className="relative scan-active rounded-2xl overflow-visible"
+          className="relative rounded-[4rem] overflow-visible flex items-center justify-center p-12 bg-slate-900/5 border border-white/5 backdrop-blur-sm self-stretch"
           style={{
-            width:"100%", maxWidth:"300px",
-            aspectRatio:"200/510",
-            padding:"0 72px",
-            boxSizing:"content-box",
+            width:"100%", maxWidth:"900px",
+            height: "760px",
+            margin: "0 auto"
           }}
         >
-          {/* Inner body container */}
-          <div
-            key={bodyKey}
-            className={fading ? "player-out" : "player-in"}
-            style={{ width:"100%", height:"100%", position:"relative" }}
-          >
-            {/* Ambient frame glow */}
-            <div style={{
-              position:"absolute", inset:"-2px",
-              borderRadius:"16px",
-              boxShadow:`0 0 60px rgba(6,182,212,0.07), inset 0 0 40px rgba(6,182,212,0.03)`,
-              pointerEvents:"none", zIndex:0,
-            }} />
+          {/* Diagnostic Corner Marks - Professional Edition */}
+          <div className="absolute top-10 left-10 w-12 h-12 border-t-2 border-l-2 border-slate-800 rounded-tl-3xl pointer-events-none opacity-40" />
+          <div className="absolute top-10 right-10 w-12 h-12 border-t-2 border-r-2 border-slate-800 rounded-tr-3xl pointer-events-none opacity-40" />
+          <div className="absolute bottom-10 left-10 w-12 h-12 border-b-2 border-l-2 border-slate-800 rounded-bl-3xl pointer-events-none opacity-40" />
+          <div className="absolute bottom-10 right-10 w-12 h-12 border-b-2 border-r-2 border-slate-800 rounded-tr-3xl pointer-events-none opacity-40" />
 
-            {/* Corner marks */}
-            <div className="c-tl" /><div className="c-tr" />
-            <div className="c-bl" /><div className="c-br" />
+          {/* Atmospheric Glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.05)_0%,transparent_70%)] pointer-events-none" />
 
-            <ThermalBody risks={risks} rotationY={rotationY} />
-          </div>
-        </div>
-
-        {/* 360 Rotation Slider */}
-        <div className="w-full max-w-[260px] flex items-center gap-3 bg-slate-900/50 p-3 rounded-2xl border border-slate-800">
-           <RotateCw size={16} className="text-cyan-500 opacity-70" />
-           <Slider 
-             className="flex-1 m-0"
-             min={0} 
-             max={360} 
-             value={rotationY} 
-             onChange={setRotationY}
-             tooltip={{ formatter: val => `${val}°` }}
-             trackStyle={{ background: '#22d3ee' }}
-             handleStyle={{ borderColor: '#22d3ee', background: '#0f172a' }}
-           />
-           <span className="text-xs font-mono text-cyan-400 w-8">{rotationY}°</span>
+          <PhotorealisticTwin 
+            risks={risks} 
+            reportedZones={[]} 
+            activeZoneId={activeZone}
+            onZoneClick={toggleZone}
+            isSplit={true}
+          />
         </div>
 
         {/* Legend */}
@@ -191,6 +173,7 @@ export default function CoachDashboard({ liveAlerts = [] }) {
             player={selected}
             playTime={playTime}
             temperature={temperature}
+            activeZone={activeZone}
           />
         </div>
         <div className="anim-right d200">

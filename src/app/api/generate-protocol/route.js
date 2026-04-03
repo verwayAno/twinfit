@@ -15,8 +15,8 @@ export async function POST(request) {
     // Simulate LLM processing time
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Determine the highest risk zone
-    const maxRisk = Math.max(risks.hamstrings || 0, risks.knees || 0, risks.lowerBack || 0);
+    // Use the pre-calculated highest risk value from the model
+    const maxRisk = risks.rawMaxRisk || 0;
 
     // If safe, return a positive message
     if (maxRisk < 40) {
